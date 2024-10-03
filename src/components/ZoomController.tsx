@@ -5,18 +5,13 @@ import {
   SliderFilledTrack,
   SliderThumb,
 } from '@chakra-ui/react';
+
 import { useScale } from '../state/scale';
 
 const ZoomControl = () => {
   const [scale, setScale] = useScale();
   return (
-    <Box
-      position="absolute"
-      bottom="20px"
-      left="50%"
-      transform="translateX(-50%)"
-      width="300px"
-    >
+    <Box width="300px">
       <Slider
         aria-label="Zoom"
         defaultValue={scale * 100}

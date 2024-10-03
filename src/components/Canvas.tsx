@@ -7,10 +7,9 @@ import {
 } from '../utils/color';
 import { useColor } from '../state/color';
 import { COLOR_DROPPER_SIZE } from '../utils/constants';
-import { Box, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { SelectColor } from '../assets/SelectColor';
 import { useScale } from '../state/scale';
-import ZoomControl from './ZoomController';
 
 const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,7 +20,7 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   const zoomedColorsRef = useRef<HTMLDivElement>(null);
 
   // State for zoom and drag
-  const [scale, setScale] = useScale();
+  const [scale] = useScale();
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -98,11 +97,12 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     return 'grab';
   };
 
+  // Initialize Canvas and draw the image
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
 
-    if (ctx) {
+    if (ctx && canvas) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = imageSrc;
@@ -111,71 +111,81 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
         if (canvas) {
           canvas.width = img.width;
           canvas.height = img.height;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            img.width,
-            img.height,
-            offset.x,
-            offset.y,
-            img.width * scale,
-            img.height * scale,
-          );
+          drawImage(ctx, img);
         }
       };
     }
-  }, [imageSrc, scale, offset]);
+  }, [imageSrc, scale]);
+
+  const drawImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.save();
+
+    // Calculate center of the canvas
+    const centerX = ctx.canvas.width / 2;
+    const centerY = ctx.canvas.height / 2;
+
+    // Translate to center, scale, then translate back
+    ctx.translate(centerX, centerY);
+    ctx.scale(scale, scale);
+    ctx.drawImage(
+      img,
+      -img.width / 2, // Center the image horizontally
+      -img.height / 2, // Center the image vertically
+      img.width,
+      img.height,
+    );
+
+    ctx.restore();
+  };
 
   return (
     <>
-      <Flex
-        className="magnifier-container"
-        ref={zoomedColorsRef}
-        position="absolute"
-        border={`2px solid ${hoveredColor}`}
-        zIndex={1}
-      >
-        <SelectColor color={hoveredColor} />
-        <table className="magnifier-container-table">
-          <tbody>
-            {colorMatrix.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((color, colIndex) => (
-                  <td
-                    key={colIndex}
-                    style={{
-                      backgroundColor: color,
-                      width: '10px',
-                      height: '10px',
-                    }}
-                    className="magnifier-container-table-cell"
-                  >
-                    {rowIndex === Math.floor(COLOR_DROPPER_SIZE / 2) &&
-                    colIndex === Math.floor(COLOR_DROPPER_SIZE / 2) ? (
-                      <div className="magnifier-container-center" />
-                    ) : null}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Flex>
+      {colorDropperActive ? (
+        <Flex
+          className="magnifier-container"
+          ref={zoomedColorsRef}
+          position="absolute"
+          zIndex={1}
+          display="none"
+        >
+          <SelectColor color={hoveredColor} />
+          <table className="magnifier-container-table">
+            <tbody>
+              {colorMatrix.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((color, colIndex) => (
+                    <td
+                      key={colIndex}
+                      style={{
+                        backgroundColor: color,
+                        width: '10px',
+                        height: '10px',
+                      }}
+                      className="magnifier-container-table-cell"
+                    >
+                      {rowIndex === Math.floor(COLOR_DROPPER_SIZE / 2) &&
+                      colIndex === Math.floor(COLOR_DROPPER_SIZE / 2) ? (
+                        <div className="magnifier-container-center" />
+                      ) : null}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Flex>
+      ) : null}
 
-      <Box position="relative">
-        <canvas
-          ref={canvasRef}
-          style={{ height: 'auto', width: '100vw', cursor: getCursorMode() }}
-          onMouseLeave={hideZoomedColors}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseMove={isDragging ? handleMouseMove : pickColor}
-          onClick={selectColor}
-        />
-        <ZoomControl />
-      </Box>
+      <canvas
+        ref={canvasRef}
+        style={{ height: 'auto', width: '100vw', cursor: getCursorMode() }}
+        onMouseLeave={hideZoomedColors}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={isDragging ? handleMouseMove : pickColor}
+        onClick={selectColor}
+      />
     </>
   );
 };

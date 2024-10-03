@@ -1,11 +1,11 @@
 import { Button, Flex, useClipboard, Box, Tooltip } from '@chakra-ui/react';
-
 import { ColorPickerIcon } from '../assets/ColorPickerIcon';
 import { useColor } from '../state/color';
 import { usePickColor } from '../state/pickColor';
 import ImageUploader from './ImageUploader';
 import { useImageSrc } from '../state/image';
 import DisplayColor from './DisplayColor';
+import ZoomControl from './ZoomController';
 
 const CanvasController = () => {
   const [color] = useColor();
@@ -34,20 +34,22 @@ const CanvasController = () => {
       gap={{ base: 4, md: 6 }}
       justifyContent="space-between"
       p={4}
-      bg="gray.100"
+      bg="white"
       borderRadius="lg"
       boxShadow="md"
+      border="1px solid" // Added border for better definition
+      borderColor="gray.200"
     >
       <Tooltip label="Pick a color" aria-label="Pick a color tooltip">
         <Button
           variant="solid"
-          borderRadius="50%"
-          w="12"
-          h="12"
+          borderRadius="full" // Changed to full for a more circular appearance
+          w={14} // Increased width for better touch targets
+          h={14} // Increased height for better touch targets
           onClick={handlePickColorMode}
           isActive={colorDropperActive}
           isDisabled={!canPickColor}
-          border={`2px solid ${colorDropperActive ? 'purple' : 'teal'}`}
+          border={`2px solid ${colorDropperActive ? 'purple.500' : 'teal.500'}`}
           _hover={{
             borderColor: colorDropperActive ? 'purple.400' : 'teal.400',
             transform: 'scale(1.1)',
@@ -73,12 +75,13 @@ const CanvasController = () => {
       >
         {color?.hexColor && (
           <Box
-            w={10}
-            h={10}
+            w={12} // Increased size for better visibility
+            h={12}
             bg={color.hexColor}
             borderRadius="md"
-            border="1px solid"
+            border="2px solid" // Added border for definition
             borderColor="gray.300"
+            boxShadow="md" // Added shadow for a subtle 3D effect
           />
         )}
 
@@ -92,6 +95,7 @@ const CanvasController = () => {
           onCopy={onCopyHex}
           label="Copy HEX"
         />
+        {imageSrc ? <ZoomControl /> : null}
       </Flex>
 
       <Box>
@@ -100,4 +104,5 @@ const CanvasController = () => {
     </Flex>
   );
 };
+
 export default CanvasController;
