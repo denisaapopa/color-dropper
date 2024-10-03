@@ -7,10 +7,14 @@ import { useImageSrc } from '../state/image';
 import DisplayColor from './DisplayColor';
 import ZoomControl from './ZoomController';
 import { useScale } from '../state/scale';
+import { useDrag } from '../state/drag';
+import { useOffset } from '../state/offset';
 
 const CanvasController = () => {
   const [color, setColor] = useColor();
   const [, setScale] = useScale();
+  const [, setDrag] = useDrag();
+  const [, setOffset] = useOffset();
 
   const [colorDropperActive, setIsColorDropperActive] = usePickColor();
   const { onCopy: onCopyHex } = useClipboard(color ?? '');
@@ -30,6 +34,9 @@ const CanvasController = () => {
   };
 
   const resetControllerState = () => {
+    setDrag({ x: 0, y: 0 });
+    setOffset({ x: 0, y: 0 });
+
     setScale(1);
     setIsColorDropperActive(false);
     setColor(undefined);
@@ -46,15 +53,15 @@ const CanvasController = () => {
       bg="white"
       borderRadius="lg"
       boxShadow="md"
-      border="1px solid" // Added border for better definition
+      border="1px solid"
       borderColor="gray.200"
     >
       <Tooltip label="Pick a color" aria-label="Pick a color tooltip">
         <Button
           variant="solid"
-          borderRadius="full" // Changed to full for a more circular appearance
-          w={14} // Increased width for better touch targets
-          h={14} // Increased height for better touch targets
+          borderRadius="full"
+          w={14}
+          h={14}
           onClick={handlePickColorMode}
           isActive={colorDropperActive}
           isDisabled={!canPickColor}
@@ -84,13 +91,13 @@ const CanvasController = () => {
       >
         {color && (
           <Box
-            w={12} // Increased size for better visibility
+            w={12}
             h={12}
             bg={color}
             borderRadius="md"
-            border="2px solid" // Added border for definition
+            border="2px solid"
             borderColor="gray.300"
-            boxShadow="md" // Added shadow for a subtle 3D effect
+            boxShadow="md"
           />
         )}
 

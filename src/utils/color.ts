@@ -5,8 +5,11 @@ export function getPixelData(
   pageX: number,
   pageY: number,
 ): Uint8ClampedArray {
-  const x = pageX;
-  const y = pageY;
+  const halfSize = Math.floor(COLOR_DROPPER_SIZE / 2);
+
+  // Calculate the top-left corner of the area to get
+  const x = Math.floor(pageX - halfSize);
+  const y = Math.floor(pageY - halfSize);
 
   return ctx.getImageData(x, y, COLOR_DROPPER_SIZE, COLOR_DROPPER_SIZE).data;
 }

@@ -10,6 +10,8 @@ import { COLOR_DROPPER_SIZE } from '../utils/constants';
 import { Flex } from '@chakra-ui/react';
 import { SelectColor } from '../assets/SelectColor';
 import { useScale } from '../state/scale';
+import { useDrag } from '../state/drag';
+import { useOffset } from '../state/offset';
 
 const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,9 +24,9 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
 
   // State for zoom and drag
   const [scale] = useScale();
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [offset, setOffset] = useOffset();
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useDrag();
 
   const pickColor = (e: React.MouseEvent) => {
     if (!colorDropperActive || !canvasRef.current) return;
@@ -35,11 +37,19 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     if (!ctx || !zoomedColors) return;
 
     const bounding = canvas.getBoundingClientRect();
+
+    // Calculate the mouse position on the canvas with scaling and dragging
     const x = (e.clientX - bounding.left - offset.x) / scale;
     const y = (e.clientY - bounding.top - offset.y) / scale;
 
-    const pixelData = getPixelData(ctx, x, y);
+    // Ensure the coordinates are within canvas bounds
+    const clampedX = Math.max(0, Math.min(x, canvas.width - 1));
+    const clampedY = Math.max(0, Math.min(y, canvas.height - 1));
 
+    // Get the pixel data at the adjusted coordinates
+    const pixelData = getPixelData(ctx, clampedX, clampedY);
+
+    // Set the position for the zoomed color display
     zoomedColors.style.left = `${e.clientX}px`;
     zoomedColors.style.top = `${e.clientY}px`;
     zoomedColors.style.transform = `translate(-50%, -50%)`;
