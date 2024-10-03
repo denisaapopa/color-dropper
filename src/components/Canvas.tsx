@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePickColor } from '../state/pickColor';
 import {
   getPixelData,
@@ -13,6 +13,7 @@ import { useScale } from '../state/scale';
 
 const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null); // Ref to store the image
   const [colorDropperActive, setIsColorDropperActive] = usePickColor();
   const [hoveredColor, setHoveredColor] = useState('#000000');
   const [colorMatrix, setColorMatrix] = useState<string[][]>([]);
@@ -50,10 +51,6 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
 
     setColorMatrix(colorMatrix);
     setHoveredColor(centerColor);
-
-    if (zoomedColorsRef.current) {
-      zoomedColorsRef.current.style.display = 'block';
-    }
   };
 
   const selectColor = () => {
@@ -67,19 +64,30 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   };
 
   const hideZoomedColors = () => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
     if (zoomedColorsRef.current) {
       zoomedColorsRef.current.style.display = 'none';
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    if (!colorDropperActive) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
-      setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+      const newOffsetX = e.clientX - dragStart.x;
+      const newOffsetY = e.clientY - dragStart.y;
+      setOffset({ x: newOffsetX, y: newOffsetY });
+      const ctx = canvasRef.current?.getContext('2d');
+      drawImage(ctx, imageRef.current); // Redraw the image with updated offset
+    } else {
+      pickColor(e);
     }
   };
 
@@ -97,27 +105,11 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     return 'grab';
   };
 
-  // Initialize Canvas and draw the image
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-
-    if (ctx && canvas) {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = imageSrc;
-
-      img.onload = () => {
-        if (canvas) {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          drawImage(ctx, img);
-        }
-      };
-    }
-  }, [imageSrc, scale]);
-
-  const drawImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
+  const drawImage = (
+    ctx?: CanvasRenderingContext2D | null,
+    img?: HTMLImageElement | null,
+  ) => {
+    if (!ctx || !img) return; // Check if context and image are available
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.save();
 
@@ -125,8 +117,8 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     const centerX = ctx.canvas.width / 2;
     const centerY = ctx.canvas.height / 2;
 
-    // Translate to center, scale, then translate back
-    ctx.translate(centerX, centerY);
+    // Translate to center, apply offset, then scale
+    ctx.translate(centerX + offset.x, centerY + offset.y);
     ctx.scale(scale, scale);
     ctx.drawImage(
       img,
@@ -138,6 +130,35 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
 
     ctx.restore();
   };
+
+  // Initialize Canvas and draw the image
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+
+    if (ctx && canvas) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imageSrc;
+      imageRef.current = img; // Store image in ref
+
+      img.onload = () => {
+        if (canvas) {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          drawImage(ctx, img); // Draw initial image
+        }
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageSrc, scale]);
+
+  useEffect(() => {
+    // Redraw the image when offset or scale changes
+    const ctx = canvasRef.current?.getContext('2d');
+    drawImage(ctx, imageRef.current); // Redraw image on offset/scale change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageSrc, scale, offset]);
 
   return (
     <>
@@ -183,7 +204,7 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
         onMouseLeave={hideZoomedColors}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
-        onMouseMove={isDragging ? handleMouseMove : pickColor}
+        onMouseMove={handleMouseMove}
         onClick={selectColor}
       />
     </>
