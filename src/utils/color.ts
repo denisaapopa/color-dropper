@@ -2,14 +2,14 @@ import { COLOR_DROPPER_SIZE } from './constants';
 
 export function getPixelData(
   ctx: CanvasRenderingContext2D,
-  pageX: number,
-  pageY: number,
+  offsetX: number,
+  offsetY: number,
 ): Uint8ClampedArray {
   const halfSize = Math.floor(COLOR_DROPPER_SIZE / 2);
 
   // Calculate the top-left corner of the area to get
-  const x = Math.floor(pageX - halfSize);
-  const y = Math.floor(pageY - halfSize);
+  const x = Math.floor(offsetX - halfSize);
+  const y = Math.floor(offsetY - halfSize);
 
   return ctx.getImageData(x, y, COLOR_DROPPER_SIZE, COLOR_DROPPER_SIZE).data;
 }
