@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePickColor } from '../state/pickColor';
 import {
-  getPixelData,
   getColorMatrixFromPixelData,
   getCenterColorFromMatrix,
-} from '../utils/color';
+  drawImage,
+  getPixelData,
+} from '../utils/canvas';
 import { useColor } from '../state/color';
 import { COLOR_DROPPER_SIZE } from '../utils/constants';
 import { Flex } from '@chakra-ui/react';
@@ -13,7 +14,7 @@ import { useScale } from '../state/scale';
 import { useDrag } from '../state/drag';
 import { useOffset } from '../state/offset';
 
-const Canvas = ({ imageSrc }: { imageSrc: string }) => {
+const CanvasContainer = ({ imageSrc }: { imageSrc: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null); // Ref to store the image
   const [colorDropperActive, setIsColorDropperActive] = usePickColor();
@@ -34,28 +35,35 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     const canvas = canvasRef.current;
     const zoomedColors = zoomedColorsRef.current;
     const ctx = canvas.getContext('2d');
-    if (!ctx || !zoomedColors) return;
+    if (!ctx || !zoomedColors || !imageRef.current) return;
 
+    const image = imageRef.current;
+
+    // Get the canvas bounding rectangle
     const bounding = canvas.getBoundingClientRect();
 
-    // Calculate the mouse position on the canvas with scaling and dragging
-    const x = (e.clientX - bounding.left - offset.x) / scale;
-    const y = (e.clientY - bounding.top - offset.y) / scale;
+    // Calculate the scale factor between the canvas size and the image size
+    const scaleX = image.width / bounding.width;
+    const scaleY = image.height / bounding.height;
 
-    // Ensure the coordinates are within canvas bounds
-    const clampedX = Math.max(0, Math.min(x, canvas.width - 1));
-    const clampedY = Math.max(0, Math.min(y, canvas.height - 1));
+    // Calculate mouse position on canvas, considering the canvas' dimensions and zoom
+    const x = (e.clientX - bounding.left) * scaleX;
+    const y = (e.clientY - bounding.top) * scaleY;
 
-    // Get the pixel data at the adjusted coordinates
+    // Clamp values to prevent out-of-bound errors
+    const clampedX = Math.max(0, Math.min(x, image.width - 1));
+    const clampedY = Math.max(0, Math.min(y, image.height - 1));
+
     const pixelData = getPixelData(ctx, clampedX, clampedY);
 
-    // Set the position for the zoomed color display
+    // Set zoomed colors position and visibility
     zoomedColors.style.left = `${e.clientX}px`;
     zoomedColors.style.top = `${e.clientY}px`;
     zoomedColors.style.transform = `translate(-50%, -50%)`;
     zoomedColors.style.display = 'block';
     zoomedColors.dataset.color = hoveredColor;
 
+    // Get color matrix from the pixel data and set the hovered color
     const colorMatrix = getColorMatrixFromPixelData(pixelData);
     const centerColor = getCenterColorFromMatrix(colorMatrix);
 
@@ -92,9 +100,9 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
       const newOffsetY = e.clientY - dragStart.y;
       setOffset({ x: newOffsetX, y: newOffsetY });
       const ctx = canvasRef.current?.getContext('2d');
-      drawImage(ctx, imageRef.current); // Redraw the image with updated offset
+      drawImage(offset, scale, ctx, imageRef.current); // Redraw the image with updated offset
     } else {
-      pickColor(e);
+      pickColor(e); // If not dragging, allow picking color
     }
   };
 
@@ -112,32 +120,6 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
     return 'grab';
   };
 
-  const drawImage = (
-    ctx?: CanvasRenderingContext2D | null,
-    img?: HTMLImageElement | null,
-  ) => {
-    if (!ctx || !img) return; // Check if context and image are available
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.save();
-
-    // Calculate center of the canvas
-    const centerX = ctx.canvas.width / 2;
-    const centerY = ctx.canvas.height / 2;
-
-    // Translate to center, apply offset, then scale
-    ctx.translate(centerX + offset.x, centerY + offset.y);
-    ctx.scale(scale, scale);
-    ctx.drawImage(
-      img,
-      -img.width / 2, // Center the image horizontally
-      -img.height / 2, // Center the image vertically
-      img.width,
-      img.height,
-    );
-
-    ctx.restore();
-  };
-
   // Initialize Canvas and draw the image
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -153,7 +135,7 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
         if (canvas) {
           canvas.width = img.width;
           canvas.height = img.height;
-          drawImage(ctx, img); // Draw initial image
+          drawImage(offset, scale, ctx, img); // Draw initial image
         }
       };
     }
@@ -163,7 +145,8 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   useEffect(() => {
     // Redraw the image when offset or scale changes
     const ctx = canvasRef.current?.getContext('2d');
-    drawImage(ctx, imageRef.current); // Redraw image on offset/scale change
+    drawImage(offset, scale, ctx, imageRef.current); // Redraw image on offset/scale change
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageSrc, scale, offset]);
 
@@ -218,4 +201,4 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
   );
 };
 
-export default Canvas;
+export default CanvasContainer;

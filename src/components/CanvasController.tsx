@@ -1,4 +1,11 @@
-import { Button, Flex, useClipboard, Box, Tooltip } from '@chakra-ui/react';
+import {
+  Button,
+  Flex,
+  Text,
+  useClipboard,
+  Box,
+  Tooltip,
+} from '@chakra-ui/react';
 import { ColorPickerIcon } from '../assets/ColorPickerIcon';
 import { useColor } from '../state/color';
 import { usePickColor } from '../state/pickColor';
@@ -102,12 +109,28 @@ const CanvasController = () => {
         )}
 
         <DisplayColor color={color} onCopy={onCopyHex} label="Copy HEX" />
-        {imageSrc ? <ZoomControl /> : null}
+
+        {imageSrc ? (
+          <>
+            <ZoomControl />
+            <Tooltip
+              label="Reset image view to default"
+              aria-label="Reset image view to default"
+            >
+              <Button
+                onClick={resetControllerState}
+                as="span"
+                colorScheme="teal"
+                size="sm"
+              >
+                <Text>Reset</Text>
+              </Button>
+            </Tooltip>
+          </>
+        ) : null}
       </Flex>
 
-      <Box>
-        <ImageUploader onImageUpload={handleImageUpload} />
-      </Box>
+      <ImageUploader onImageUpload={handleImageUpload} />
     </Flex>
   );
 };
