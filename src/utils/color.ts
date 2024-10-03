@@ -1,14 +1,5 @@
 import { COLOR_DROPPER_SIZE } from './constants';
 
-export const componentToHex = (c: number) => {
-  const hex = c.toString(16);
-  return hex.length == 1 ? '0' + hex : hex;
-};
-
-export const rgbToHex = (r: number, g: number, b: number) => {
-  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
-};
-
 export function getPixelData(
   ctx: CanvasRenderingContext2D,
   pageX: number,
@@ -41,5 +32,5 @@ export function getColorMatrixFromPixelData(data: Uint8ClampedArray) {
 
 export function getCenterColorFromMatrix(colorMatrix: string[][]) {
   const center = Math.floor(COLOR_DROPPER_SIZE / 2);
-  return colorMatrix[center - 1][center - 1];
+  return colorMatrix[center][center];
 }
