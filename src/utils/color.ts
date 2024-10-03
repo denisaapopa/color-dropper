@@ -1,19 +1,5 @@
 import { COLOR_DROPPER_SIZE } from './constants';
 
-export function getPixelData(
-  ctx: CanvasRenderingContext2D,
-  offsetX: number,
-  offsetY: number,
-): Uint8ClampedArray {
-  const halfSize = Math.floor(COLOR_DROPPER_SIZE / 2);
-
-  // Calculate the top-left corner of the area to get
-  const x = Math.floor(offsetX - halfSize);
-  const y = Math.floor(offsetY - halfSize);
-
-  return ctx.getImageData(x, y, COLOR_DROPPER_SIZE, COLOR_DROPPER_SIZE).data;
-}
-
 export function getNormalizedHexColor(r: number, g: number, b: number) {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }

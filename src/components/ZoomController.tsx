@@ -1,18 +1,20 @@
 import {
-  Box,
   Slider,
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  Button,
+  Text,
+  Flex,
 } from '@chakra-ui/react';
 
 import { useScale } from '../state/scale';
 
 const ZoomControl = () => {
   const [scale, setScale] = useScale();
-  console.log(scale);
+
   return (
-    <Box width="300px">
+    <Flex width="300px" gap={4}>
       <Slider
         aria-label="Zoom"
         value={scale * 100}
@@ -26,7 +28,15 @@ const ZoomControl = () => {
         </SliderTrack>
         <SliderThumb />
       </Slider>
-    </Box>
+      <Button
+        onClick={() => setScale(1)}
+        as="span"
+        colorScheme="teal"
+        size="sm"
+      >
+        <Text>Reset</Text>
+      </Button>
+    </Flex>
   );
 };
 
