@@ -3,24 +3,25 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  Button,
-  Text,
   Flex,
 } from '@chakra-ui/react';
 
 import { useScale } from '../state/scale';
 
+const MIN_SCALE = 0.3;
+const MAX_SCALE = 3;
+const UNIT = 100;
+
 const ZoomControl = () => {
   const [scale, setScale] = useScale();
-
   return (
-    <Flex width="300px" gap={4}>
+    <Flex width="200px">
       <Slider
         aria-label="Zoom"
-        value={scale * 100}
-        min={30}
-        max={300}
-        onChange={(value) => setScale(value / 100)}
+        value={scale * UNIT}
+        min={MIN_SCALE * UNIT}
+        max={MAX_SCALE * UNIT}
+        onChange={(value) => setScale(value / UNIT)}
         step={1}
       >
         <SliderTrack>
@@ -28,14 +29,6 @@ const ZoomControl = () => {
         </SliderTrack>
         <SliderThumb />
       </Slider>
-      <Button
-        onClick={() => setScale(1)}
-        as="span"
-        colorScheme="teal"
-        size="sm"
-      >
-        <Text>Reset</Text>
-      </Button>
     </Flex>
   );
 };
