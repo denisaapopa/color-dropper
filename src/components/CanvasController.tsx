@@ -9,7 +9,7 @@ import DisplayColor from './DisplayColor';
 
 const CanvasController = () => {
   const [color] = useColor();
-  const [pickColor, setPickColor] = usePickColor();
+  const [colorDropperActive, setIsColorDropperActive] = usePickColor();
   const { onCopy: onCopyHex } = useClipboard(color?.hexColor ?? '');
   const { onCopy: onCopyRgb } = useClipboard(color?.rgbColor ?? '');
   const [imageSrc, setImageSrc] = useImageSrc();
@@ -18,7 +18,7 @@ const CanvasController = () => {
 
   const handlePickColorMode = () => {
     if (canPickColor) {
-      setPickColor(!pickColor);
+      setIsColorDropperActive(!colorDropperActive);
     }
   };
 
@@ -45,13 +45,20 @@ const CanvasController = () => {
           w="12"
           h="12"
           onClick={handlePickColorMode}
-          isActive={pickColor}
+          isActive={colorDropperActive}
           isDisabled={!canPickColor}
-          border="2px solid teal"
-          _hover={{ borderColor: 'teal.400', transform: 'scale(1.1)' }}
-          _active={{ transform: 'scale(1.05)', bg: 'teal.100' }}
+          border={`2px solid ${colorDropperActive ? 'purple' : 'teal'}`}
+          _hover={{
+            borderColor: colorDropperActive ? 'purple.400' : 'teal.400',
+            transform: 'scale(1.1)',
+          }}
+          _active={{
+            transform: 'scale(1.05)',
+            bg: colorDropperActive ? 'purple.100' : 'teal.100',
+          }}
+          _disabled={{ borderColor: 'gray.400', bg: 'gray.200' }}
         >
-          <ColorPickerIcon color="teal" />
+          <ColorPickerIcon color={colorDropperActive ? 'purple' : 'teal'} />
         </Button>
       </Tooltip>
 
