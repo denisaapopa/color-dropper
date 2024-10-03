@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePickColor } from '../state/pickColor';
 import {
   getPixelData,
@@ -55,10 +55,7 @@ const Canvas = ({ imageSrc }: { imageSrc: string }) => {
 
   const selectColor = () => {
     if (colorDropperActive) {
-      setDropperColor({
-        hexColor: hoveredColor,
-        rgbColor: hoveredColor,
-      });
+      setDropperColor(hoveredColor);
       setIsColorDropperActive(false);
     }
   };

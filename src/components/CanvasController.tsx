@@ -6,12 +6,14 @@ import ImageUploader from './ImageUploader';
 import { useImageSrc } from '../state/image';
 import DisplayColor from './DisplayColor';
 import ZoomControl from './ZoomController';
+import { useScale } from '../state/scale';
 
 const CanvasController = () => {
-  const [color] = useColor();
+  const [color, setColor] = useColor();
+  const [, setScale] = useScale();
+
   const [colorDropperActive, setIsColorDropperActive] = usePickColor();
-  const { onCopy: onCopyHex } = useClipboard(color?.hexColor ?? '');
-  const { onCopy: onCopyRgb } = useClipboard(color?.rgbColor ?? '');
+  const { onCopy: onCopyHex } = useClipboard(color ?? '');
   const [imageSrc, setImageSrc] = useImageSrc();
 
   const canPickColor = imageSrc !== null;
@@ -23,7 +25,14 @@ const CanvasController = () => {
   };
 
   const handleImageUpload = (url: string) => {
+    resetControllerState();
     setImageSrc(url);
+  };
+
+  const resetControllerState = () => {
+    setScale(1);
+    setIsColorDropperActive(false);
+    setColor(undefined);
   };
 
   return (
@@ -73,11 +82,11 @@ const CanvasController = () => {
         maxW={{ base: '100%', md: '60%' }}
         position="relative"
       >
-        {color?.hexColor && (
+        {color && (
           <Box
             w={12} // Increased size for better visibility
             h={12}
-            bg={color.hexColor}
+            bg={color}
             borderRadius="md"
             border="2px solid" // Added border for definition
             borderColor="gray.300"
@@ -85,16 +94,7 @@ const CanvasController = () => {
           />
         )}
 
-        <DisplayColor
-          color={color?.rgbColor}
-          onCopy={onCopyRgb}
-          label="Copy RGB"
-        />
-        <DisplayColor
-          color={color?.hexColor}
-          onCopy={onCopyHex}
-          label="Copy HEX"
-        />
+        <DisplayColor color={color} onCopy={onCopyHex} label="Copy HEX" />
         {imageSrc ? <ZoomControl /> : null}
       </Flex>
 

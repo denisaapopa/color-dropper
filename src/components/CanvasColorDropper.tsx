@@ -15,15 +15,14 @@ const CanvasColorDropper: React.FC = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      position="relative"
-      w="full"
+      width="full"
       h="full"
       ref={containerRef}
     >
       {imageSrc ? (
         <Canvas imageSrc={imageSrc} />
       ) : (
-        <Flex>
+        <Flex h="100vh" w="full" alignItems="center" justifyContent="center">
           <Text> Upload an image</Text>
         </Flex>
       )}

@@ -1,7 +1,6 @@
 import { atom, useRecoilState } from 'recoil';
-import { Color } from '../types/Color';
 
-const color = atom<Color>({
+const color = atom<string | undefined>({
   key: 'color',
   default: undefined,
 });

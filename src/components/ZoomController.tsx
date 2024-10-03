@@ -10,13 +10,14 @@ import { useScale } from '../state/scale';
 
 const ZoomControl = () => {
   const [scale, setScale] = useScale();
+  console.log(scale);
   return (
     <Box width="300px">
       <Slider
         aria-label="Zoom"
-        defaultValue={scale * 100}
-        min={50}
-        max={500}
+        value={scale * 100}
+        min={30}
+        max={300}
         onChange={(value) => setScale(value / 100)}
         step={1}
       >

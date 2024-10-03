@@ -1,14 +1,14 @@
-import { VStack } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 
 import CanvasController from './components/CanvasController';
 import CanvasColorDropper from './components/CanvasColorDropper';
 
 const App = () => {
   return (
-    <VStack>
+    <Flex w="full" h="full" direction="column">
       <CanvasController />
       <CanvasColorDropper />
-    </VStack>
+    </Flex>
   );
 };
 
