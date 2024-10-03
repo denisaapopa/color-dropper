@@ -1,50 +1,64 @@
-# React + TypeScript + Vite
+# Color Dropper
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based tool that allows users to upload images, zoom, drag, reset to default, and use a color dropper to select a color. The selected color can be copied to the clipboard as a hex code.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Image Upload**: Upload an image to the canvas and interact with it.
+- **Zoom and Drag**: Easily zoom in and out of the image and drag it around the canvas.
+- **Color Picker**: Activate the color picker tool to select any color on the image.
+- **Reset Image**: Restore the image to its original state.
+- **Copy Color**: Copy the selected color's hex code to the clipboard from the top bar.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Vite**: Fast and modern build tool optimized for front-end development.
+- **React**: JavaScript library for building interactive UIs.
+- **TypeScript**: Typed superset of JavaScript that adds static types.
+- **Chakra UI**: Simple, modular, and accessible component library for React.
+- **Recoil**: State management for React applications.
 
-- Configure the top-level `parserOptions` property like this:
+## Installation and Setup
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/color-dropper.git
+   cd color-dropper
+   ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react';
+3. Run the project locally:
+   ```bash
+   npm run dev
+   ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-});
-```
+   This will start the Vite development server, and you can access the application at `http://localhost:3000`.
+
+## Scripts
+
+- `npm run dev`: Starts the Vite development server.
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Previews the production build locally.
+- `npm run lint`: Lints the code using ESLint.
+- `npm run format`: Formats the code using Prettier.
+
+## How to Use
+
+1. **Upload an Image**: Drag and drop an image or click the upload button to load your image onto the canvas.
+2. **Zoom and Drag**: Scroll to zoom in and out. Click and drag to move the image around the canvas.
+3. **Reset Image**: Click the reset button to restore the image to its default size and position.
+4. **Activate Color Picker**: Toggle the color picker to hover over the image and select a color.
+5. **Copy Color**: The selected color’s hex code will appear in the top bar. Click the button to copy it to your clipboard.
+
+## Dependencies
+
+- `@chakra-ui/react`: For the user interface components.
+- `react`, `react-dom`: Core libraries for the React application.
+- `recoil`: For state management.
+- `@emotion/react`, `@emotion/styled`: For CSS-in-JS styling.
+- `framer-motion`: For animations and interactions.
+
